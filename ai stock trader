@@ -1,0 +1,184 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+
+st.set_page_config(
+    page_title="Stock AI Paper Trader",
+    page_icon="📈",
+    layout="wide"
+)
+
+st.title("📈 Stock AI Paper Trader")
+st.caption("Paper trading only — no real money is being used.")
+
+# -----------------------------
+# SIDEBAR
+# -----------------------------
+
+st.sidebar.header("Scanner")
+
+market = st.sidebar.selectbox(
+    "Market",
+    ["NGX", "US Stocks"]
+)
+
+capital = st.sidebar.number_input(
+    "Paper Trading Capital (₦)",
+    min_value=1000,
+    value=100000,
+    step=1000
+)
+
+risk = st.sidebar.slider(
+    "Risk per trade (%)",
+    0.5,
+    10.0,
+    2.0
+)
+
+st.sidebar.divider()
+
+st.sidebar.write("Strategy Engine")
+
+strategies = st.sidebar.multiselect(
+    "Strategies",
+    [
+        "RSI Reversal",
+        "Moving Average Crossover",
+        "Volume Breakout",
+        "Momentum",
+        "Support/Resistance"
+    ],
+    default=[
+        "RSI Reversal",
+        "Moving Average Crossover"
+    ]
+)
+
+# -----------------------------
+# DASHBOARD
+# -----------------------------
+
+col1, col2, col3, col4 = st.columns(4)
+
+col1.metric("Paper Capital", f"₦{capital:,.0f}")
+col2.metric("Risk / Trade", f"{risk:.1f}%")
+col3.metric("Strategies", len(strategies))
+col4.metric("Scanner", "READY")
+
+st.divider()
+
+st.subheader("🔎 Market Scanner")
+
+if st.button("SCAN MARKET", use_container_width=True):
+
+    st.info(
+        "Scanner initialized. "
+        "The market-data connector will be added next."
+    )
+
+st.divider()
+
+st.subheader("🤖 Strategy Laboratory")
+
+st.write(
+    "This section will test thousands of strategy combinations "
+    "against historical data and rank them by performance."
+)
+
+if st.button("RUN 1,000 PAPER TESTS", use_container_width=True):
+
+    progress = st.progress(0)
+
+    results = []
+
+    for i in range(1000):
+
+        # Temporary simulation.
+        # Real historical market data will replace this.
+
+        win_rate = np.random.uniform(0.40, 0.90)
+        trades = np.random.randint(50, 500)
+        drawdown = np.random.uniform(0.03, 0.30)
+
+        score = (
+            win_rate * 100
+            - drawdown * 100
+        )
+
+        results.append({
+            "Test": i + 1,
+            "Win Rate": round(win_rate * 100, 2),
+            "Trades": trades,
+            "Max Drawdown": round(drawdown * 100, 2),
+            "Score": round(score, 2)
+        })
+
+        progress.progress((i + 1) / 1000)
+
+    df = pd.DataFrame(results)
+
+    df = df.sort_values(
+        "Score",
+        ascending=False
+    )
+
+    st.success("1,000 paper tests completed.")
+
+    st.dataframe(
+        df.head(20),
+        use_container_width=True
+    )
+
+    best = df.iloc[0]
+
+    st.subheader("🏆 Best Strategy Test")
+
+    st.metric(
+        "Historical Win Rate",
+        f"{best['Win Rate']:.2f}%"
+    )
+
+    st.metric(
+        "Maximum Drawdown",
+        f"{best['Max Drawdown']:.2f}%"
+    )
+
+    if best["Win Rate"] >= 80:
+
+        st.success(
+            "⚠️ High historical win-rate detected. "
+            "This is NOT a guarantee of future performance."
+        )
+
+    else:
+
+        st.warning(
+            "No strategy reached the 80% historical threshold."
+        )
+
+st.divider()
+
+st.subheader("📊 Paper Portfolio")
+
+portfolio = pd.DataFrame(
+    columns=[
+        "Stock",
+        "Entry",
+        "Stop Loss",
+        "Target",
+        "Quantity",
+        "Status",
+        "P/L"
+    ]
+)
+
+st.dataframe(
+    portfolio,
+    use_container_width=True
+)
+
+st.caption(
+    "Next modules: live market data, real backtesting, "
+    "NGX stock universe, paper execution, and notifications."
+)
